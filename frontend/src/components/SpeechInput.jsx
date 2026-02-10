@@ -42,9 +42,9 @@ export default function SpeechInput({ isListening, toggleListening, isTranscribi
         color: isTranscribing ? '#f59e0b' : isListening ? '#3b82f6' : '#9ca3af',
         transition: 'color 0.3s ease'
       }}>
-        {isTranscribing ? '🔄 Transcribing...' : 
-         isListening ? '🎤 Recording...' : 
-         'Microphone Inactive'}
+        {isTranscribing ? 'Transcribing...' : 
+         isListening ? 'Recording...' : 
+         'Ready'}
       </p>
       
       {/* Start/Stop Button */}
@@ -79,9 +79,9 @@ export default function SpeechInput({ isListening, toggleListening, isTranscribi
           }
         }}
       >
-        {isTranscribing ? '⏳ Processing...' :
-         isListening ? '⏹️ Stop Recording' : 
-         '🎤 Start Listening'}
+        {isTranscribing ? 'Processing...' :
+         isListening ? 'Stop Recording' : 
+         'Start Listening'}
       </button>
 
       {/* Helper Text */}
@@ -92,8 +92,8 @@ export default function SpeechInput({ isListening, toggleListening, isTranscribi
           color: '#6b7280',
           maxWidth: '300px'
         }}>
-          Click the button above to start recording your voice. 
-          Speak clearly and click stop when done.
+          Click the button above to start recording your voice.
+          Click stop when done.
         </p>
       )}
 
