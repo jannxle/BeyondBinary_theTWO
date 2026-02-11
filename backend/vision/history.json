@@ -6,5 +6,12 @@
       "timestamp": "2026-02-11T16:32:34.728417"
     }
   ],
-  "hello@gmail.com": []
+  "hello@gmail.com": [
+    {
+      "type": "vision",
+      "mode": "text",
+      "result": "Here's all the visible text in the image:\n\nOn the phone screen:\n\n*   16:46\n*   5G\n*   out caused it to explode\n*   mothershipsg\n*   mothership\n*   S'pore man, 31, assaults woman who let him stay at her condo for 7 months\n*   READ MORE >\n*   2,889\n*   49\n*   22\n*   mothershipsg\n*   The two met as the man was a regular at...",
+      "timestamp": "2026-02-11T16:46:53.399612"
+    }
+  ]
 }

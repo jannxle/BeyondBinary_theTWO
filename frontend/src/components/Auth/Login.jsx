@@ -17,7 +17,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
     }
 
     try {
-      const response = await fetch('http://localhost:5003/api/auth/login', {
+      const response = await fetch('http://localhost:5004/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -31,7 +31,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
         setError(data.error || 'Login failed');
       }
     } catch (error) {
-      setError('Connection error. Make sure the server is running on port 5003.');
+      setError('Connection error. Make sure the server is running on port 5004.');
       console.error('Error:', error);
     }
   };

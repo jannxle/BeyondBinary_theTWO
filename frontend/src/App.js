@@ -59,7 +59,7 @@ function App() {
     if (!user || !user.email) return;
 
     try {
-      const response = await fetch('http://localhost:5003/api/history/get', {
+      const response = await fetch('http://localhost:5004/api/history/get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
@@ -206,7 +206,7 @@ function App() {
         formData.append('image', blob, 'capture.jpg');
         formData.append('mode', visionMode);
 
-        const response = await fetch('http://localhost:5002/api/analyze', {
+        const response = await fetch('http://localhost:5004/api/analyze', {
           method: 'POST',
           body: formData
         });
@@ -262,7 +262,7 @@ function App() {
           formData.append('audio', audioBlob);
 
           try {
-            const response = await fetch('http://localhost:5001/api/transcribe', {
+            const response = await fetch('http://localhost:5004/api/transcribe', {
               method: 'POST',
               body: formData
             });

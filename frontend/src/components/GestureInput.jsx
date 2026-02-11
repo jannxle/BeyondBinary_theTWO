@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, CameraOff, Eye, Type, AlertTriangle, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 
 export default function GestureInput({ 
@@ -9,11 +9,18 @@ export default function GestureInput({
   onCapture,
   analysisResult,
   isAnalyzing,
-  speechSpeed = 1.0
+  speechSpeed = 1.0,
+  onClearResult // Add this prop to allow clearing from parent
 }) {
   const [selectedMode, setSelectedMode] = useState('general');
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastMessage, setLastMessage] = useState('');
+  const [modeResults, setModeResults] = useState({
+    general: '',
+    text: '',
+    hazard: ''
+  });
+  const [analyzingMode, setAnalyzingMode] = useState(''); // Track which mode is being analyzed
 
   // Colorblind-friendly palette
   const modes = [
@@ -22,8 +29,28 @@ export default function GestureInput({
     { id: 'hazard', label: 'Detect Hazards', icon: AlertTriangle, color: '#CC3311', bg: '#FFE6E6' }
   ];
 
+  // Stop speaking when mode changes
+  useEffect(() => {
+    stopSpeaking();
+  }, [selectedMode]);
+
+  // Update result for the mode that was analyzed (not necessarily the current mode)
+  useEffect(() => {
+    if (analysisResult && analyzingMode) {
+      setModeResults(prev => ({
+        ...prev,
+        [analyzingMode]: analysisResult
+      }));
+      setAnalyzingMode(''); // Clear the analyzing mode
+    }
+  }, [analysisResult, analyzingMode]);
+
+  // Get the current mode's result
+  const currentModeResult = modeResults[selectedMode];
+
   const handleCapture = () => {
     if (onCapture) {
+      setAnalyzingMode(selectedMode); // Store which mode we're analyzing
       onCapture(selectedMode);
     }
   };
@@ -64,12 +91,12 @@ export default function GestureInput({
     }
   };
 
-  // Update last message when analysis result changes
-  React.useEffect(() => {
-    if (analysisResult && analysisResult !== lastMessage) {
-      setLastMessage(analysisResult);
+  // Update last message when current result changes
+  useEffect(() => {
+    if (currentModeResult && currentModeResult !== lastMessage) {
+      setLastMessage(currentModeResult);
     }
-  }, [analysisResult]);
+  }, [currentModeResult]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -325,14 +352,14 @@ export default function GestureInput({
           <div style={{
             padding: '1.75rem',
             borderRadius: '12px',
-            backgroundColor: analysisResult ? modes.find(m => m.id === selectedMode)?.bg : '#F9F9F9',
-            border: `3px solid ${analysisResult ? modes.find(m => m.id === selectedMode)?.color : '#E0E0E0'}`,
+            backgroundColor: currentModeResult ? modes.find(m => m.id === selectedMode)?.bg : '#F9F9F9',
+            border: `3px solid ${currentModeResult ? modes.find(m => m.id === selectedMode)?.color : '#E0E0E0'}`,
             minHeight: '250px',
             display: 'flex',
             flexDirection: 'column',
             gap: '1rem'
           }}>
-            {analysisResult ? (
+            {currentModeResult ? (
               <>
                 <div style={{
                   display: 'flex',
@@ -357,7 +384,7 @@ export default function GestureInput({
                     {!isSpeaking ? (
                       <>
                         <button
-                          onClick={() => speakText(analysisResult)}
+                          onClick={() => speakText(currentModeResult)}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -465,7 +492,7 @@ export default function GestureInput({
                   color: '#333333',
                   fontWeight: '500'
                 }}>
-                  {analysisResult}
+                  {currentModeResult}
                 </p>
               </>
             ) : (
