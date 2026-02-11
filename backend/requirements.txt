@@ -1,0 +1,25 @@
+# Flask Backend Dependencies
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# Whisper AI Speech-to-Text
+openai-whisper>=20231117
+
+# Required by Whisper
+torch>=2.0.0
+torchaudio>=2.0.0
+numpy>=1.24.0
+
+# Audio Processing (Whisper dependencies)
+ffmpeg-python>=0.2.0
+more-itertools>=8.0.0
+
+# Additional utilities
+python-dotenv>=1.0.0
+
+google-generativeai>=0.3.0
+gtts>=2.3.0
+pygame>=2.5.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+python-dotenv>=1.0.0
