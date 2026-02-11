@@ -57,7 +57,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
         marginBottom: '0.5rem',
         textAlign: 'center'
       }}>
-        Hand2Voice
+        EchoSight
       </h2>
       <p style={{
         textAlign: 'center',

@@ -97,7 +97,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
         color: '#666',
         marginBottom: '2rem'
       }}>
-        Join Hand2Voice today
+        Join Echosight today
       </p>
 
       {error && (

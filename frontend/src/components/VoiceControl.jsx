@@ -488,7 +488,7 @@ const VoiceControl = ({
             <div className="mic-permission-icon">🎤</div>
             <h2 className="mic-permission-title">Microphone Access Required</h2>
             <p className="mic-permission-text">
-              Hand2Voice needs microphone access for voice control.
+              EchoSight needs microphone access for voice control.
             </p>
             <div className="mic-permission-buttons">
               <button onClick={requestMicrophonePermission} className="btn-primary">

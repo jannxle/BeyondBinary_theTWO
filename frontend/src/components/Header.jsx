@@ -24,7 +24,7 @@ export default function Header() {
             letterSpacing: '-0.025em',
             fontFamily: '"Playwrite NZ Basic", cursive'
           }}>
-            Hand2Voice
+            EchoSight
           </h1>
         <p style={{
           margin: '0.25rem 0 0 0',
