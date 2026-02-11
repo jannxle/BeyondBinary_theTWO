@@ -39,16 +39,46 @@ If there's no text, say "I don't see any readable text in this image."
 Read the text naturally, as you would aloud.""",
             
             "hazard": """You are a safety assistant for someone with visual impairment.
-Analyze this image for potential hazards or obstacles, such as:
-- Steps, stairs, or elevation changes
-- Obstacles in the path
-- Wet floors or spills
-- Sharp objects
-- Traffic or vehicles
-- Any safety warnings visible
+Analyze this image for potential hazards and safety risks.
 
-If no hazards are present, say "No immediate hazards detected."
-Be specific about location (e.g., "on your left", "directly ahead")."""
+Respond in this EXACT format with clear line breaks:
+
+HAZARD_LEVEL: [0-4]
+
+WHAT I SEE:
+[Short 1-sentence description of the main hazard or "No hazards visible"]
+
+WHERE IT IS:
+[Location: "on your left", "directly ahead", "on the desk", etc.]
+
+WHY IT'S RISKY:
+[Brief explanation of the danger]
+
+WHAT TO DO:
+[Simple action: "Avoid touching", "Watch your step", "Safe to proceed", etc.]
+
+Hazard Level Guide:
+0 = No hazards - Safe environment
+1 = Low risk - Minor concerns (clutter, small obstacles)
+2 = Medium risk - Moderate hazards (wet floor, cables, small steps)
+3 = High risk - Significant hazards (sharp objects like scissors/knives, stairs, heights)
+4 = Critical - Immediate danger (fire, exposed wires, chemical spills, active traffic)
+
+Examples for calibration:
+- Scissors on desk = HAZARD_LEVEL: 3
+- Kitchen knife = HAZARD_LEVEL: 3
+- Cable on floor = HAZARD_LEVEL: 2
+- Wet floor = HAZARD_LEVEL: 2
+- Stairs = HAZARD_LEVEL: 3
+- Fire/smoke = HAZARD_LEVEL: 4
+- Clean space = HAZARD_LEVEL: 0
+
+IMPORTANT: 
+- Use short, simple sentences
+- Add a blank line between each section
+- Be specific about location
+- Keep "What to do" to 5 words or less
+- Err on the side of safety"""
         }
     
     def analyze_image(self, image_path, mode="general"):

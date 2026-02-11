@@ -60,7 +60,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
         setError(data.error || 'Signup failed');
       }
     } catch (error) {
-      setError('Connection error. Make sure the server is running on port 5003.');
+      setError('Connection error. Make sure the server is running on port 5004.');
       console.error('Error:', error);
     }
   };
@@ -97,7 +97,7 @@ export default function Signup({ onSignup, onSwitchToLogin }) {
         color: '#666',
         marginBottom: '2rem'
       }}>
-        Join Hand2Voice today
+        Join Echosight today
       </p>
 
       {error && (

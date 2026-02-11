@@ -26,7 +26,7 @@ class VisualBuddy:
                 time.sleep(0.1)
                 
         except Exception as e:
-            print(f"❌ Speech error: {e}")
+            print(f"Speech error: {e}")
     
     def run(self):
         """Main application loop"""
@@ -38,20 +38,20 @@ class VisualBuddy:
             return
         
         print("=" * 60)
-        print("👁️  VISUAL BUDDY - Context-Aware Assistant")
+        print("VISUAL BUDDY - Context-Aware Assistant")
         print("=" * 60)
-        print("\n📸 Controls:")
+        print("\nControls:")
         print("  SPACE - Capture and describe what camera sees")
         print("  'r'   - Read text only (optimized for signs/labels)")
         print("  'h'   - Identify hazards/obstacles")
         print("  'q'   - Quit application")
-        print("\n🎥 Camera feed starting...\n")
+        print("\nCamera feed starting...\n")
         
         try:
             while True:
                 ret, frame = cap.read()
                 if not ret:
-                    print("❌ Error: Failed to read from camera")
+                    print("Error: Failed to read from camera")
                     break
                 
                 # Display status on frame
@@ -76,11 +76,11 @@ class VisualBuddy:
                     self.capture_and_analyze(frame, mode="hazard")
                     
                 elif key == ord('q'):
-                    print("\n👋 Shutting down Visual Buddy...")
+                    print("\nShutting down Visual Buddy...")
                     break
                     
         except KeyboardInterrupt:
-            print("\n\n👋 Interrupted by user")
+            print("\n\nInterrupted by user")
         finally:
             cap.release()
             cv2.destroyAllWindows()
@@ -110,7 +110,7 @@ class VisualBuddy:
                 self.speak("Sorry, I couldn't analyze the image.")
                 
         except Exception as e:
-            print(f"❌ Analysis error: {e}")
+            print(f"Analysis error: {e}")
             self.speak("Sorry, an error occurred during analysis.")
         finally:
             self.is_processing = False

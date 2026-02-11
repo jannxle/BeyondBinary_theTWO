@@ -9,6 +9,8 @@ import Signup from './components/Auth/Signup';
 import UserProfile from './components/Profile/UserProfile';
 import EmergencySOS from './components/EmergencySOS';
 import AccessibilitySettings from './components/AccessibilitySettings';
+import VoiceControl from './components/VoiceControl'; 
+import { api } from './services/api'
 import { User } from 'lucide-react';
 import './App.css';
 
@@ -47,6 +49,9 @@ function App() {
   // History state
   const [history, setHistory] = useState([]);
 
+  // Voice Control State
+  const [visionAnalysisMode, setVisionAnalysisMode] = useState('general'); // 'general', 'text', 'hazards'
+
   // Load history when user logs in
   useEffect(() => {
     if (user && user.email) {
@@ -59,7 +64,7 @@ function App() {
     if (!user || !user.email) return;
 
     try {
-      const response = await fetch('http://localhost:5003/api/history/get', {
+      const response = await fetch('http://localhost:5004/api/history/get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
@@ -80,7 +85,7 @@ function App() {
     if (!user || !user.email) return;
 
     try {
-      const response = await fetch('http://localhost:5003/api/history/add', {
+      const response = await fetch('http://localhost:5004/api/history/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -110,7 +115,7 @@ function App() {
     }
 
     try {
-      const response = await fetch('http://localhost:5003/api/history/clear', {
+      const response = await fetch('http://localhost:5004/api/history/clear', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email })
@@ -156,9 +161,44 @@ function App() {
     const scale = getTextScale();
     
     document.body.style.fontSize = `${scale}rem`;
-    document.body.style.backgroundColor = colors.bg;
+    // Only apply background color for high contrast modes, not normal mode
+    if (accessibilitySettings.contrastMode !== 'normal') {
+      document.body.style.backgroundColor = colors.bg;
+    } else {
+      document.body.style.backgroundColor = '#ffffff';
+    }
     document.body.style.color = colors.text;
   }, [accessibilitySettings]);
+
+  // Voice Control Handler for Camera Start
+  const handleVoiceStartCamera = async () => {
+    if (!isVideoActive) {
+      await toggleVideo();
+    }
+  };
+
+  // Voice Control Handler for Camera Stop
+  const handleVoiceStopCamera = async () => {
+    if (isVideoActive) {
+      await toggleVideo();
+    }
+  };
+
+  // Voice Control Handler for Analyze
+  const handleVoiceAnalyze = async () => {
+    if (isVideoActive) {
+      await captureAndAnalyze(visionAnalysisMode);
+    } else {
+      const msg = 'Please start the camera first';
+      speakText(msg);
+    }
+  };
+
+  // Voice Control Handler for Mode Change
+  const handleVoiceModeChange = (mode) => {
+    setVisionAnalysisMode(mode);
+    console.log('Vision analysis mode changed to:', mode);
+  };
 
   // Toggle video for vision mode
   const toggleVideo = async () => {
@@ -206,7 +246,7 @@ function App() {
         formData.append('image', blob, 'capture.jpg');
         formData.append('mode', visionMode);
 
-        const response = await fetch('http://localhost:5002/api/analyze', {
+        const response = await fetch('http://localhost:5004/api/analyze', {
           method: 'POST',
           body: formData
         });
@@ -216,6 +256,9 @@ function App() {
         if (data.success) {
           setAnalysisResult(data.description);
           
+          // SPEAK THE RESULT for visually impaired users
+          speakText(data.description);
+          
           // Add to history (server will handle timestamp)
           await addHistoryEntry({
             type: 'vision',
@@ -223,7 +266,9 @@ function App() {
             result: data.description
           });
         } else {
-          setAnalysisResult('Analysis failed: ' + data.error);
+          const errorMsg = 'Analysis failed: ' + data.error;
+          setAnalysisResult(errorMsg);
+          speakText(errorMsg);
         }
         
         setIsAnalyzing(false);
@@ -231,7 +276,9 @@ function App() {
       
     } catch (error) {
       console.error('Error analyzing image:', error);
-      setAnalysisResult('Error: ' + error.message);
+      const errorMsg = 'Error: ' + error.message;
+      setAnalysisResult(errorMsg);
+      speakText(errorMsg);
       setIsAnalyzing(false);
     }
   };
@@ -262,7 +309,7 @@ function App() {
           formData.append('audio', audioBlob);
 
           try {
-            const response = await fetch('http://localhost:5001/api/transcribe', {
+            const response = await fetch('http://localhost:5004/api/transcribe', {
               method: 'POST',
               body: formData
             });
@@ -332,11 +379,7 @@ function App() {
   // If user is not logged in, show auth screens
   if (!user) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '2rem'
-      }}>
+      <div className="app-container">
         {authView === 'login' ? (
           <Login 
             onLogin={setUser} 
@@ -355,11 +398,7 @@ function App() {
   // If showing profile
   if (showProfile) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '2rem'
-      }}>
+      <div className="app-container">
         <UserProfile 
           user={user} 
           onLogout={handleLogout}
@@ -374,11 +413,7 @@ function App() {
 
   // Main app (logged in)
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '2rem'
-    }}>
+    <div className="app-container">
       {/* Emergency SOS Button - Always visible */}
       <EmergencySOS user={user} />
 
@@ -397,7 +432,7 @@ function App() {
         color: colors.text,
         borderRadius: '20px',
         padding: '2rem',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+        boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
       }}>
         {/* User info in header */}
         <div style={{
@@ -427,6 +462,18 @@ function App() {
             {user.name}
           </button>
         </div>
+
+        {/* Intelligent Voice Control Component */}
+        <VoiceControl
+          onStartCamera={handleVoiceStartCamera}
+          onStopCamera={handleVoiceStopCamera}
+          onAnalyze={handleVoiceAnalyze}
+          onModeChange={handleVoiceModeChange}
+          currentMode={visionAnalysisMode}
+          currentAppMode={mode}
+          userDisabilities={user?.disabilities || []}
+          autoStart={true}
+        />
         
         <ModeSelector mode={mode} setMode={setMode} contrastColors={colors} />
 

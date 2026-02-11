@@ -100,9 +100,9 @@ export default function SpeechInput({ isListening, toggleListening, isTranscribi
           }
         }}
       >
-        {isTranscribing ? '⏳ Processing...' :
-         isListening ? '⏹ Stop Recording' : 
-         '🎤 Start Listening'}
+        {isTranscribing ? 'Processing...' :
+         isListening ? 'Stop Recording' : 
+         'Start Listening'}
       </button>
 
       {/* Helper Text */}

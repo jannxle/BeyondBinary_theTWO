@@ -264,21 +264,34 @@ export default function AccessibilitySettings({
                 flexDirection: 'column',
                 gap: '1rem'
               }}>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.1"
-                  value={settings.speechSpeed}
-                  onChange={(e) => onSettingsChange({ ...settings, speechSpeed: parseFloat(e.target.value) })}
-                  style={{
-                    width: '100%',
-                    height: '8px',
-                    borderRadius: '5px',
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="1.5"
+                    step="0.1"
+                    value={settings.speechSpeed}
+                    onChange={(e) => onSettingsChange({ ...settings, speechSpeed: parseFloat(e.target.value) })}
+                    style={{
+                      width: '100%',
+                      height: '8px',
+                      borderRadius: '5px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  {/* Center marker at 1.0x */}
+                  <div style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '-5px',
+                    width: '2px',
+                    height: '18px',
+                    backgroundColor: '#0077BB',
+                    transform: 'translateX(-50%)',
+                    pointerEvents: 'none'
+                  }} />
+                </div>
                 <div style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -286,11 +299,11 @@ export default function AccessibilitySettings({
                   color: '#666',
                   fontWeight: '600'
                 }}>
-                  <span>0.5x (Slower)</span>
+                  <span>0.5x</span>
                   <span style={{ color: '#0077BB', fontSize: '1.2rem' }}>
                     {settings.speechSpeed.toFixed(1)}x
                   </span>
-                  <span>2.0x (Faster)</span>
+                  <span>1.5x</span>
                 </div>
                 {/* Test button */}
                 <button

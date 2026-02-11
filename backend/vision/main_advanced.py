@@ -1,14 +1,3 @@
-"""
-Visual Buddy Advanced - Enhanced version with additional features
-
-New features:
-- Description history
-- Screenshot saving
-- Adjustable TTS speed
-- Better UI with on-screen instructions
-- Continuous monitoring mode
-"""
-
 import cv2
 import os
 import time
