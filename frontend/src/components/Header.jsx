@@ -2,32 +2,42 @@ import React from 'react';
 
 export default function Header() {
   return (
-    <header style={{
-      textAlign: 'center',
-      padding: '2rem 1rem',
-      background: 'linear-gradient(135deg, #0077BB 0%, #009988 100%)',
-      borderRadius: '16px',
-      marginBottom: '2rem',
-      boxShadow: '0 8px 24px rgba(0, 119, 187, 0.3)'
-    }}>
-      <h1 style={{
-        margin: '0 0 0.5rem 0',
-        fontSize: '2.5rem',
-        fontWeight: '800',
-        color: 'white',
-        textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-        letterSpacing: '1px'
+    <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+      <link href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&display=swap" rel="stylesheet" />
+      
+      <header style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '1.5rem 2rem',
+        marginBottom: '3rem',
+        borderBottom: '1px solid #e5e7eb'
       }}>
-        Hand2Voice
-      </h1>
-      <p style={{
-        margin: 0,
-        fontSize: '1.2rem',
-        color: '#E6F3FF',
-        fontWeight: '500'
-      }}>
-        Your Communication Assistant
-      </p>
+        <div>
+          <h1 style={{
+            margin: 0,
+            fontSize: '1.875rem',
+            fontWeight: '400',
+            color: '#0f172a',
+            letterSpacing: '-0.025em',
+            fontFamily: '"Playwrite NZ Basic", cursive'
+          }}>
+            Hand2Voice
+          </h1>
+        <p style={{
+          margin: '0.25rem 0 0 0',
+          fontSize: '0.875rem',
+          color: '#64748b',
+          fontWeight: '400'
+        }}>
+          Your Communication Assistant
+        </p>
+      </div>
+      
+
     </header>
+    </>
   );
 }

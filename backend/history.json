@@ -1,3 +1,22 @@
 {
-  "test1@gmail.com": []
+  "test1@gmail.com": [
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're looking at a large, yellow Dragonite plush toy being held by someone in a purple shirt. To the right, there's a white bottle with an orange lid, and behind it, you can see some pillows and a bright circular lamp overhead. The indoor scene appears clear with no visible text or immediate hazards.",
+      "timestamp": "2026-02-11T20:21:11.229129"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're seeing your hand in the foreground, with your index finger pointing straight up, in what looks like a bedroom. Behind your hand, there's a bed with several pillows and a light-colored water bottle with an orange cap, all under a large, circular overhead lamp. I don't see any text or obvious hazards.",
+      "timestamp": "2026-02-11T18:30:37.846257"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're holding a cute yellow Dragonite Pok\u00e9mon plush toy with light blue wings and white claws, sitting on its green packaging which clearly says \"Pok\u00e9mon\". In the background, to your right, is a white bottle with an orange cap, and some rumpled bedding, all lit by an overhead circular light. There are no immediate hazards or obstacles visible in the image.",
+      "timestamp": "2026-02-11T18:29:23.842403"
+    }
+  ]
 }

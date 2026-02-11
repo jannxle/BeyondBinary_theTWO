@@ -22,21 +22,21 @@ HISTORY_FILE = 'history.json'
 
 # ==================== LOAD MODELS AT STARTUP ====================
 print("=" * 60)
-print("🚀 Loading AI Models...")
+print("Loading AI Models...")
 print("=" * 60)
 
 # Load Vision Assistant
-print("📸 Loading Vision Assistant...")
+print("Loading Vision Assistant...")
 vision_assistant = VisualAssistant()
-print("✅ Vision Assistant ready!")
+print("Vision Assistant ready!")
 
 # Load Whisper model
-print("🎤 Loading Whisper model...")
+print("Loading Whisper model...")
 whisper_model = whisper.load_model("base")
-print("✅ Whisper model ready!")
+print("Whisper model ready!")
 
 print("=" * 60)
-print("✅ All models loaded successfully!")
+print("All models loaded successfully!")
 print("=" * 60)
 
 # ==================== HELPER FUNCTIONS ====================
@@ -300,7 +300,7 @@ def analyze_image():
         mode = request.form.get('mode', 'general')
         image_file = request.files['image']
         
-        print(f"📸 Received image for analysis (mode: {mode})")
+        print(f"Received image for analysis (mode: {mode})")
         
         # Save temporarily
         temp_path = 'temp_capture.jpg'
@@ -312,7 +312,7 @@ def analyze_image():
         # Clean up
         os.remove(temp_path)
         
-        print(f"✅ Analysis complete: {result[:100]}...")
+        print(f"Analysis complete: {result[:100]}...")
         
         return jsonify({
             'success': True,
@@ -321,7 +321,7 @@ def analyze_image():
         })
     
     except Exception as e:
-        print(f"❌ Error during analysis: {str(e)}")
+        print(f"Error during analysis: {str(e)}")
         return jsonify({
             'success': False, 
             'error': str(e)
@@ -393,24 +393,24 @@ def health():
 
 if __name__ == '__main__':
     print("\n" + "=" * 60)
-    print("🚀 Hand2Voice Unified Server")
+    print("Hand2Voice Unified Server")
     print("=" * 60)
-    print("📍 Server running at: http://localhost:5004")
+    print("Server running at: http://localhost:5004")
     print("=" * 60)
-    print("\n📋 Available Endpoints:")
-    print("\n🔐 Authentication:")
+    print("\nAvailable Endpoints:")
+    print("\nAuthentication:")
     print("  - POST /api/auth/signup")
     print("  - POST /api/auth/login")
     print("  - POST /api/auth/update-profile")
-    print("\n📜 History:")
+    print("\nHistory:")
     print("  - POST /api/history/get")
     print("  - POST /api/history/add")
     print("  - POST /api/history/clear")
-    print("\n👁️  Vision Analysis:")
+    print("\nVision Analysis:")
     print("  - POST /api/analyze")
-    print("\n🎤 Speech Transcription:")
+    print("\nSpeech Transcription:")
     print("  - POST /api/transcribe")
-    print("\n💚 Health Check:")
+    print("\nHealth Check:")
     print("  - GET  /api/health")
     print("=" * 60 + "\n")
     

@@ -9,7 +9,7 @@
 
 .app-container {
   min-height: 100vh;
-  background: #f5f5f7;
+  background: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 40px 20px;
 }
@@ -63,7 +63,7 @@
 }
 
 .mode-button.active {
-  background: #5ac8fa;
+  background: #60cdff;
   border-color: #5ac8fa;
   color: white;
 }

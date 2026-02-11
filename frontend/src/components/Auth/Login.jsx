@@ -6,6 +6,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,6 +16,8 @@ export default function Login({ onLogin, onSwitchToSignup }) {
       setError('Please fill in all fields');
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await fetch('http://localhost:5004/api/auth/login', {
@@ -31,8 +34,10 @@ export default function Login({ onLogin, onSwitchToSignup }) {
         setError(data.error || 'Login failed');
       }
     } catch (error) {
-      setError('Connection error. Make sure the server is running on port 5004.');
+      setError('Cannot connect to server. Make sure the backend is running on port 5004.');
       console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,21 +57,21 @@ export default function Login({ onLogin, onSwitchToSignup }) {
         marginBottom: '0.5rem',
         textAlign: 'center'
       }}>
-        Welcome Back
+        Hand2Voice
       </h2>
       <p style={{
         textAlign: 'center',
         color: '#666',
         marginBottom: '2rem'
       }}>
-        Sign in to continue to Hand2Voice
+        Turning your gestures into words instantly!
       </p>
 
       {error && (
         <div style={{
           padding: '1rem',
           backgroundColor: '#FFE6E6',
-          border: '2px solid #CC3311',
+          border: '2px solidrgb(230, 42, 0)',
           borderRadius: '10px',
           color: '#CC3311',
           marginBottom: '1.5rem',
@@ -100,6 +105,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '1rem 1rem 1rem 3rem',
@@ -107,7 +113,8 @@ export default function Login({ onLogin, onSwitchToSignup }) {
                 border: '2px solid #E0E0E0',
                 borderRadius: '10px',
                 outline: 'none',
-                transition: 'border 0.2s'
+                transition: 'border 0.2s',
+                opacity: loading ? 0.6 : 1
               }}
               onFocus={(e) => e.target.style.borderColor = '#0077BB'}
               onBlur={(e) => e.target.style.borderColor = '#E0E0E0'}
@@ -137,6 +144,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '1rem 3rem 1rem 3rem',
@@ -144,7 +152,8 @@ export default function Login({ onLogin, onSwitchToSignup }) {
                 border: '2px solid #E0E0E0',
                 borderRadius: '10px',
                 outline: 'none',
-                transition: 'border 0.2s'
+                transition: 'border 0.2s',
+                opacity: loading ? 0.6 : 1
               }}
               onFocus={(e) => e.target.style.borderColor = '#0077BB'}
               onBlur={(e) => e.target.style.borderColor = '#E0E0E0'}
@@ -152,6 +161,7 @@ export default function Login({ onLogin, onSwitchToSignup }) {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              disabled={loading}
               style={{
                 position: 'absolute',
                 right: '1rem',
@@ -159,8 +169,9 @@ export default function Login({ onLogin, onSwitchToSignup }) {
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
-                cursor: 'pointer',
-                padding: '0.25rem'
+                cursor: loading ? 'not-allowed' : 'pointer',
+                padding: '0.25rem',
+                opacity: loading ? 0.6 : 1
               }}
             >
               {showPassword ? <EyeOff size={20} color="#999" /> : <Eye size={20} color="#999" />}
@@ -170,30 +181,35 @@ export default function Login({ onLogin, onSwitchToSignup }) {
 
         <button
           type="submit"
+          disabled={loading}
           style={{
             padding: '1.25rem',
             fontSize: '1.1rem',
             fontWeight: '700',
             color: 'white',
-            backgroundColor: '#0077BB',
+            backgroundColor: loading ? '#999' : '#0077BB',
             border: 'none',
             borderRadius: '12px',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             textTransform: 'uppercase',
             letterSpacing: '0.5px',
             transition: 'all 0.2s',
             boxShadow: '0 4px 12px rgba(0, 119, 187, 0.3)'
           }}
           onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 6px 16px rgba(0, 119, 187, 0.4)';
+            if (!loading) {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 16px rgba(0, 119, 187, 0.4)';
+            }
           }}
           onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 12px rgba(0, 119, 187, 0.3)';
+            if (!loading) {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(0, 119, 187, 0.3)';
+            }
           }}
         >
-          Sign In
+          {loading ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
 
@@ -206,12 +222,13 @@ export default function Login({ onLogin, onSwitchToSignup }) {
         Don't have an account?{' '}
         <button
           onClick={onSwitchToSignup}
+          disabled={loading}
           style={{
             background: 'none',
             border: 'none',
-            color: '#0077BB',
+            color: loading ? '#999' : '#0077BB',
             fontWeight: '700',
-            cursor: 'pointer',
+            cursor: loading ? 'not-allowed' : 'pointer',
             textDecoration: 'underline'
           }}
         >
