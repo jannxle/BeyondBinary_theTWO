@@ -49,7 +49,7 @@ function App() {
   // History state
   const [history, setHistory] = useState([]);
 
-  // ========== ADD THIS: Voice Control State ==========
+  // Voice Control State
   const [visionAnalysisMode, setVisionAnalysisMode] = useState('general'); // 'general', 'text', 'hazards'
 
   // Load history when user logs in
@@ -170,25 +170,31 @@ function App() {
     document.body.style.color = colors.text;
   }, [accessibilitySettings]);
 
-  // ========== ADD THIS: Voice Control Handler for Camera ==========
+  // Voice Control Handler for Camera Start
   const handleVoiceStartCamera = async () => {
-    // This starts the camera (same as toggleVideo when video is off)
     if (!isVideoActive) {
       await toggleVideo();
     }
   };
 
-  // ========== ADD THIS: Voice Control Handler for Analyze ==========
-  const handleVoiceAnalyze = async () => {
-    // This triggers analysis with the current vision mode
+  // Voice Control Handler for Camera Stop
+  const handleVoiceStopCamera = async () => {
     if (isVideoActive) {
-      await captureAndAnalyze(visionAnalysisMode);
-    } else {
-      alert('Please start the camera first by saying "start camera"');
+      await toggleVideo();
     }
   };
 
-  // ========== ADD THIS: Voice Control Handler for Mode Change ==========
+  // Voice Control Handler for Analyze
+  const handleVoiceAnalyze = async () => {
+    if (isVideoActive) {
+      await captureAndAnalyze(visionAnalysisMode);
+    } else {
+      const msg = 'Please start the camera first';
+      speakText(msg);
+    }
+  };
+
+  // Voice Control Handler for Mode Change
   const handleVoiceModeChange = (mode) => {
     setVisionAnalysisMode(mode);
     console.log('Vision analysis mode changed to:', mode);
@@ -250,6 +256,9 @@ function App() {
         if (data.success) {
           setAnalysisResult(data.description);
           
+          // SPEAK THE RESULT for visually impaired users
+          speakText(data.description);
+          
           // Add to history (server will handle timestamp)
           await addHistoryEntry({
             type: 'vision',
@@ -257,7 +266,9 @@ function App() {
             result: data.description
           });
         } else {
-          setAnalysisResult('Analysis failed: ' + data.error);
+          const errorMsg = 'Analysis failed: ' + data.error;
+          setAnalysisResult(errorMsg);
+          speakText(errorMsg);
         }
         
         setIsAnalyzing(false);
@@ -265,7 +276,9 @@ function App() {
       
     } catch (error) {
       console.error('Error analyzing image:', error);
-      setAnalysisResult('Error: ' + error.message);
+      const errorMsg = 'Error: ' + error.message;
+      setAnalysisResult(errorMsg);
+      speakText(errorMsg);
       setIsAnalyzing(false);
     }
   };
@@ -450,12 +463,16 @@ function App() {
           </button>
         </div>
 
-        {/* ========== ADD THIS: VoiceControl Component ========== */}
+        {/* Intelligent Voice Control Component */}
         <VoiceControl
           onStartCamera={handleVoiceStartCamera}
+          onStopCamera={handleVoiceStopCamera}
           onAnalyze={handleVoiceAnalyze}
           onModeChange={handleVoiceModeChange}
           currentMode={visionAnalysisMode}
+          currentAppMode={mode}
+          userDisabilities={user?.disabilities || []}
+          autoStart={true}
         />
         
         <ModeSelector mode={mode} setMode={setMode} contrastColors={colors} />

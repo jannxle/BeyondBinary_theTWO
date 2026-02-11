@@ -1,6 +1,70 @@
 {
   "test1@gmail.com": [
     {
+      "type": "speech",
+      "result": "Hello, hello, hello.",
+      "timestamp": "2026-02-11T21:21:57.414550"
+    },
+    {
+      "type": "vision",
+      "mode": "text",
+      "result": "Analysis failed: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 46.979769619s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}\n, violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.5-flash\"\n  }\n  quota_value: 20\n}\n, retry_delay {\n  seconds: 46\n}\n]",
+      "timestamp": "2026-02-11T21:20:13.158247"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're holding open a pair of bronze-bladed scissors in the foreground, pointed towards a bright vertical light strip on a light-colored wall. Above, a brown shelf spans the top of the image, with some red items visible beneath it. Please be mindful of the open, sharp blades.",
+      "timestamp": "2026-02-11T21:19:12.882347"
+    },
+    {
+      "type": "vision",
+      "mode": "hazard",
+      "result": "HAZARD_LEVEL: 3\n\nWHAT I SEE:\nA hand is holding open scissors.\n\nWHERE IT IS:\nHeld in your hand, directly in front of you.\n\nWHY IT'S RISKY:\nSharp blades can cause cuts.\n\nWHAT TO DO:\nClose or put down scissors.",
+      "timestamp": "2026-02-11T21:18:24.934800"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're seeing a close-up, slightly upward-angled shot of a person's face, wearing dark-rimmed glasses and looking downwards, with a bright rectangular ceiling light and light-colored wall and curtains in the background. There are no visible hazards or text.",
+      "timestamp": "2026-02-11T21:17:06.610530"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're looking up at a room with a bright, vertical fluorescent light fixture on the white ceiling. To your right are drawn beige curtains, and there's a rectangular corkboard on the wall to your left. At the very bottom, you can see the top of a person's forehead and dark hair.",
+      "timestamp": "2026-02-11T21:04:36.005518"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "Okay, this image shows a young person in glasses and a red shirt, looking slightly down and to the left. Behind them, there's a light wall with an empty corkboard on the left and light-colored curtains on the right. There are no visible hazards or text in the scene.",
+      "timestamp": "2026-02-11T20:59:44.249403"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "This image shows a young woman with dark hair and glasses, looking towards the camera with a subtle smile, filling the lower half of the frame. Behind her, you can see a white wall with a ceiling light, a small cork board, and light-colored curtains on the right side. There are no visible hazards or text.",
+      "timestamp": "2026-02-11T20:54:16.661499"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're seeing a close-up of a person with dark hair and rectangular glasses, whose face is visible from their forehead down to their mouth. Behind them is a light-colored room featuring a ceiling light, a framed bulletin board, and light-toned curtains on the right. There are no obvious hazards or visible text.",
+      "timestamp": "2026-02-11T20:53:57.185817"
+    },
+    {
+      "type": "vision",
+      "mode": "general",
+      "result": "You're seeing a close-up of a young woman with dark hair and glasses, wearing a red top and looking slightly to her right. Behind her is a light-colored wall with a rectangular panel on the left, and light-colored curtains to the right. There are no visible hazards or text.",
+      "timestamp": "2026-02-11T20:48:06.082205"
+    },
+    {
+      "type": "speech",
+      "result": "Hello, hello, hello",
+      "timestamp": "2026-02-11T20:33:27.279205"
+    },
+    {
       "type": "vision",
       "mode": "general",
       "result": "You're looking at a large, yellow Dragonite plush toy being held by someone in a purple shirt. To the right, there's a white bottle with an orange lid, and behind it, you can see some pillows and a bright circular lamp overhead. The indoor scene appears clear with no visible text or immediate hazards.",

@@ -1,293 +1,389 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './VoiceControl.css';  // ← CORRECT CSS IMPORT (same folder)
+import './VoiceControl.css';
 
 /**
- * VoiceControl Component
- * Provides voice recognition control for Hand2Voice application
- * Designed for accessibility and ease of use for visually impaired users
+ * VoiceControl Component - NO LOOPS VERSION
+ * Simplified to prevent any restart loops
  */
 const VoiceControl = ({ 
   onStartCamera, 
+  onStopCamera,
   onAnalyze, 
   onModeChange,
   currentMode = 'general',
+  currentAppMode = 'gesture',
+  userDisabilities = [],
+  autoStart = false,
   className = ''
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [lastCommand, setLastCommand] = useState('');
+  const [detectedIntent, setDetectedIntent] = useState('');
   const [status, setStatus] = useState('Ready to listen');
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false); // NEW: Track if we're speaking
   
   const recognitionRef = useRef(null);
-  const timeoutRef = useRef(null);
+  const hasAutoStartedRef = useRef(false);
+  const restartTimeoutRef = useRef(null);
+  const speakingTimeoutRef = useRef(null); // NEW: Track speaking timeout
+  const isListeningRef = useRef(isListening); // NEW: Track current listening state
+  const currentAppModeRef = useRef(currentAppMode); // NEW: Track current app mode
 
-  // Voice command mappings
-  const COMMANDS = {
-    // Camera control
-    startCamera: ['start camera', 'open camera', 'activate camera', 'turn on camera', 'camera on'],
-    analyze: ['analyze', 'analyze image', 'check image', 'what do you see', 'describe', 'scan'],
-    
-    // Mode selection
-    generalMode: ['general view', 'general mode', 'switch to general', 'normal mode'],
-    textMode: ['read text', 'text mode', 'ocr mode', 'switch to text', 'text reading'],
-    hazardMode: ['detect hazards', 'hazard mode', 'safety mode', 'check hazards', 'find dangers', 'danger detection'],
-    
-    // Utility
-    help: ['help', 'what can you do', 'commands', 'show commands'],
-    stop: ['stop listening', 'stop', 'cancel', 'turn off']
-  };
+  // Keep refs updated
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
 
   useEffect(() => {
-    // Check if browser supports Web Speech API
+    currentAppModeRef.current = currentAppMode;
+  }, [currentAppMode]);
+
+  // Check if user is visually impaired
+  const isVisuallyImpaired = userDisabilities.includes('visual') || 
+                             userDisabilities.includes('blind') || 
+                             userDisabilities.includes('low vision');
+
+  // KEYWORD-BASED INTENT DETECTION
+  const detectIntent = (text) => {
+    const lowerText = text.toLowerCase();
+    
+    // Camera Start
+    if (lowerText.includes('camera') && (lowerText.includes('start') || lowerText.includes('open') || lowerText.includes('turn on') || lowerText.includes('show'))) {
+      return { intent: 'START_CAMERA', confidence: 'high' };
+    }
+
+    // Camera Stop
+    if (lowerText.includes('camera') && (lowerText.includes('stop') || lowerText.includes('close') || lowerText.includes('turn off') || lowerText.includes('off'))) {
+      return { intent: 'STOP_CAMERA', confidence: 'high' };
+    }
+
+    // Analyze
+    if (lowerText.includes('analyze') || lowerText.includes('look') || lowerText.includes('see') || lowerText.includes('what') || lowerText.includes('check') || lowerText.includes('scan') || lowerText.includes('describe') || lowerText.includes('tell me')) {
+      return { intent: 'ANALYZE', confidence: 'high' };
+    }
+
+    // Hazard Detection
+    if (lowerText.includes('danger') || lowerText.includes('hazard') || lowerText.includes('safe') || lowerText.includes('obstacle')) {
+      return { intent: 'HAZARD_MODE', confidence: 'high' };
+    }
+
+    // Text Reading
+    if (lowerText.includes('read') || lowerText.includes('text') || lowerText.includes('sign') || lowerText.includes('label')) {
+      return { intent: 'TEXT_MODE', confidence: 'high' };
+    }
+
+    // General View
+    if (lowerText.includes('general') || lowerText.includes('normal')) {
+      return { intent: 'GENERAL_MODE', confidence: 'high' };
+    }
+
+    // Help
+    if (lowerText.includes('help') || lowerText.includes('command')) {
+      return { intent: 'HELP', confidence: 'high' };
+    }
+
+    // Stop Listening
+    if ((lowerText.includes('stop') && lowerText.includes('listen')) || lowerText.includes('quiet')) {
+      return { intent: 'STOP_LISTENING', confidence: 'high' };
+    }
+
+    return { intent: 'UNKNOWN', confidence: 'low' };
+  };
+
+  // Auto-start for visually impaired users
+  useEffect(() => {
+    if (isVisuallyImpaired && autoStart && !hasAutoStartedRef.current && currentAppMode === 'gesture') {
+      console.log('🔊 Auto-starting voice control');
+      setTimeout(() => {
+        setIsListening(true);
+        hasAutoStartedRef.current = true;
+      }, 2000);
+    }
+  }, [isVisuallyImpaired, autoStart, currentAppMode]);
+
+  // Auto-stop when switching to Speech mode
+  useEffect(() => {
+    if (currentAppMode === 'speech' && isListening) {
+      console.log('⚠️ Switching to Speech mode - stopping VoiceControl');
+      setIsListening(false);
+      setStatus('Voice control paused');
+    }
+  }, [currentAppMode, isListening]);
+
+  useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognition) {
       setIsSupported(true);
       
-      // Initialize speech recognition
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;
+      recognition.continuous = false; // CHANGED: Don't auto-continue
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
-      // Handle speech recognition results
       recognition.onresult = (event) => {
         const current = event.resultIndex;
-        const transcriptText = event.results[current][0].transcript.toLowerCase().trim();
+        const transcriptText = event.results[current][0].transcript.trim();
         
         setTranscript(transcriptText);
 
-        // Only process final results
         if (event.results[current].isFinal) {
-          processCommand(transcriptText);
+          console.log('🎤 Heard:', transcriptText);
+          const result = detectIntent(transcriptText);
+          console.log('🧠 Detected:', result.intent);
+          
+          if (result.confidence === 'high') {
+            setDetectedIntent(result.intent);
+            processIntent(result.intent, transcriptText);
+          } else {
+            setStatus(`Didn't understand: "${transcriptText}"`);
+          }
+          
+          // Clear transcript after processing
+          setTimeout(() => setTranscript(''), 1000);
         }
       };
 
-      // Handle errors
       recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
+        console.error('Error:', event.error);
         
-        if (event.error === 'no-speech') {
-          setStatus('No speech detected. Please try again.');
-        } else if (event.error === 'not-allowed') {
+        if (event.error === 'not-allowed') {
           setStatus('Microphone access denied');
           setShowPermissionModal(true);
           setIsListening(false);
-        } else if (event.error === 'network') {
-          setStatus('Network error. Please check your connection.');
-        } else {
-          setStatus(`Error: ${event.error}`);
+        } else if (event.error === 'no-speech') {
+          // Just restart, don't show error
+          console.log('No speech detected');
         }
       };
 
-      // Handle recognition end
       recognition.onend = () => {
-        if (isListening && recognitionRef.current) {
-          // Restart if still supposed to be listening
-          try {
-            recognition.start();
-          } catch (e) {
-            console.error('Error restarting recognition:', e);
-          }
+        console.log('Recognition ended, isSpeaking:', isSpeaking);
+        
+        // Clear any existing timeout
+        if (restartTimeoutRef.current) {
+          clearTimeout(restartTimeoutRef.current);
+        }
+        
+        // IMPORTANT: Don't restart if we're currently speaking (prevents loop!)
+        if (isSpeaking) {
+          console.log('Not restarting - currently speaking');
+          return;
+        }
+        
+        // Only restart if still listening and in gesture mode
+        if (isListening && currentAppMode === 'gesture') {
+          restartTimeoutRef.current = setTimeout(() => {
+            if (recognitionRef.current && isListening && currentAppMode === 'gesture' && !isSpeaking) {
+              try {
+                recognitionRef.current.start();
+                console.log('Restarted listening');
+              } catch (e) {
+                console.error('Restart error:', e);
+              }
+            }
+          }, 1000); // Long delay between restarts
         }
       };
 
-      // Handle recognition start
       recognition.onstart = () => {
+        console.log('Listening started');
         setStatus('Listening...');
       };
 
       recognitionRef.current = recognition;
     } else {
       setIsSupported(false);
-      setStatus('Voice recognition not supported in this browser');
+      setStatus('Not supported');
     }
 
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+      }
+      if (speakingTimeoutRef.current) {
+        clearTimeout(speakingTimeoutRef.current);
       }
     };
-  }, []);
+  }, [isListening, currentAppMode, isSpeaking]);
 
-  // Start/stop listening based on isListening state
   useEffect(() => {
     if (!recognitionRef.current) return;
 
-    try {
-      if (isListening) {
+    if (currentAppMode === 'speech') {
+      if (isListening) setIsListening(false);
+      return;
+    }
+
+    if (isListening) {
+      try {
         recognitionRef.current.start();
-        speak('Voice control activated. Say "help" for available commands.');
-      } else {
-        recognitionRef.current.stop();
-        setStatus('Voice control stopped');
-        setTranscript('');
+        console.log('▶️ Started');
+      } catch (e) {
+        console.error('Start error:', e);
       }
-    } catch (e) {
-      console.error('Error controlling recognition:', e);
+    } else {
+      recognitionRef.current.stop();
+      setStatus('Stopped');
+      setTranscript('');
+      console.log('⏹️ Stopped');
     }
-  }, [isListening]);
+  }, [isListening, currentAppMode]);
 
-  /**
-   * Process recognized voice commands
-   */
-  const processCommand = (command) => {
-    setLastCommand(command);
+  const processIntent = (intent, originalText) => {
+    setLastCommand(originalText);
     
-    // Check for camera start commands
-    if (matchesCommand(command, COMMANDS.startCamera)) {
-      handleStartCamera();
-    }
-    // Check for analyze commands
-    else if (matchesCommand(command, COMMANDS.analyze)) {
-      handleAnalyze();
-    }
-    // Check for mode changes
-    else if (matchesCommand(command, COMMANDS.generalMode)) {
-      handleModeChange('general');
-    }
-    else if (matchesCommand(command, COMMANDS.textMode)) {
-      handleModeChange('text');
-    }
-    else if (matchesCommand(command, COMMANDS.hazardMode)) {
-      handleModeChange('hazards');
-    }
-    // Utility commands
-    else if (matchesCommand(command, COMMANDS.help)) {
-      handleHelp();
-    }
-    else if (matchesCommand(command, COMMANDS.stop)) {
-      setIsListening(false);
-    }
-    else {
-      setStatus(`Command not recognized: "${command}"`);
-      speak('Command not recognized. Say "help" for available commands.');
+    switch(intent) {
+      case 'START_CAMERA':
+        handleStartCamera();
+        break;
+      case 'STOP_CAMERA':
+        handleStopCamera();
+        break;
+      case 'ANALYZE':
+        handleAnalyze();
+        break;
+      case 'GENERAL_MODE':
+        handleModeChange('general');
+        break;
+      case 'TEXT_MODE':
+        handleModeChange('text');
+        break;
+      case 'HAZARD_MODE':
+        handleModeChange('hazards');
+        break;
+      case 'HELP':
+        handleHelp();
+        break;
+      case 'STOP_LISTENING':
+        setIsListening(false);
+        break;
+      default:
+        setStatus(`Didn't understand`);
     }
   };
 
-  /**
-   * Check if command matches any of the command patterns
-   */
-  const matchesCommand = (input, patterns) => {
-    return patterns.some(pattern => input.includes(pattern));
-  };
-
-  /**
-   * Handle camera start command
-   */
   const handleStartCamera = () => {
     setStatus('Starting camera...');
-    speak('Starting camera');
-    
-    if (onStartCamera) {
-      onStartCamera();
-    }
-    
-    // Update status after delay
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setStatus('Camera active. Say "analyze" to analyze the image.');
-    }, 2000);
+    speak('Opening camera');
+    if (onStartCamera) onStartCamera();
   };
 
-  /**
-   * Handle analyze command
-   */
+  const handleStopCamera = () => {
+    setStatus('Stopping camera...');
+    speak('Closing camera');
+    if (onStopCamera) onStopCamera();
+  };
+
   const handleAnalyze = () => {
-    const modeNames = {
-      general: 'general view',
-      text: 'text reading',
-      hazards: 'hazard detection'
-    };
-    
-    setStatus(`Analyzing in ${modeNames[currentMode]} mode...`);
-    speak(`Analyzing image in ${modeNames[currentMode]} mode`);
-    
-    if (onAnalyze) {
-      onAnalyze();
-    }
+    setStatus('Analyzing...');
+    speak('Analyzing image');
+    if (onAnalyze) onAnalyze();
   };
 
-  /**
-   * Handle mode change commands
-   */
   const handleModeChange = (mode) => {
-    const modeNames = {
-      general: 'general view',
-      text: 'text reading',
-      hazards: 'hazard detection'
+    const modeNames = { 
+      general: 'general view', 
+      text: 'text reading', 
+      hazards: 'hazard detection' 
     };
-    
-    setStatus(`Switching to ${modeNames[mode]} mode`);
+    setStatus(`Mode: ${modeNames[mode]}`);
     speak(`Switched to ${modeNames[mode]} mode`);
-    
-    if (onModeChange) {
-      onModeChange(mode);
-    }
+    if (onModeChange) onModeChange(mode);
   };
 
-  /**
-   * Handle help command
-   */
   const handleHelp = () => {
-    const helpMessage = `Available voice commands: 
-      Say "start camera" to activate the camera. 
-      Say "analyze" to analyze the current image. 
-      Say "detect hazards" for hazard detection mode. 
-      Say "read text" for text reading mode. 
-      Say "general view" for general analysis mode.
-      Say "stop listening" to deactivate voice control.`;
-    
-    setStatus('Help requested');
-    speak(helpMessage);
+    setStatus('Speak naturally: "show camera", "what do you see", "check dangers"');
+    speak('Speak naturally. Say show camera, what do you see, or check dangers.');
   };
 
-  /**
-   * Text-to-speech feedback
-   */
+  // Text-to-speech with loop prevention
   const speak = (text) => {
+    if (!text || isSpeaking) {
+      console.log('Skipping speech - already speaking');
+      return;
+    }
+
     if ('speechSynthesis' in window) {
-      // Cancel any ongoing speech
+      setIsSpeaking(true);
+      
+      // Cancel any existing speech
       window.speechSynthesis.cancel();
       
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
-      utterance.pitch = 1;
       utterance.volume = 1;
-      utterance.lang = 'en-US';
+      
+      utterance.onend = () => {
+        console.log('Speech ended');
+        // Clear the speaking flag after a delay
+        if (speakingTimeoutRef.current) {
+          clearTimeout(speakingTimeoutRef.current);
+        }
+        speakingTimeoutRef.current = setTimeout(() => {
+          setIsSpeaking(false);
+          
+          // CRITICAL FIX: Restart recognition after speaking if we should still be listening
+          // Use refs to get current values (not closure values)
+          if (isListeningRef.current && currentAppModeRef.current === 'gesture' && recognitionRef.current) {
+            console.log('Restarting recognition after speech');
+            try {
+              recognitionRef.current.start();
+            } catch (e) {
+              if (e.name !== 'InvalidStateError') {
+                console.error('Error restarting after speech:', e);
+              }
+            }
+          }
+        }, 500); // Wait 500ms before restarting
+      };
+      
+      utterance.onerror = () => {
+        console.log('Speech error');
+        setIsSpeaking(false);
+        
+        // Try to restart even on error (use refs)
+        if (isListeningRef.current && currentAppModeRef.current === 'gesture' && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (e) {
+            console.error('Error restarting after speech error:', e);
+          }
+        }
+      };
       
       window.speechSynthesis.speak(utterance);
+      console.log('Speaking:', text);
     }
   };
 
-  /**
-   * Toggle voice recognition on/off
-   */
   const toggleListening = () => {
     if (!isSupported) {
-      alert('Voice recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
+      alert('Not supported. Use Chrome, Edge, or Safari.');
       return;
     }
+    
+    if (currentAppMode === 'speech') {
+      alert('Switch to Vision Mode first');
+      return;
+    }
+    
     setIsListening(!isListening);
   };
 
-  /**
-   * Request microphone permission
-   */
   const requestMicrophonePermission = async () => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       setShowPermissionModal(false);
       setIsListening(true);
     } catch (error) {
-      alert('Unable to access microphone. Please check your browser settings and grant microphone permission.');
+      alert('Unable to access microphone');
     }
   };
 
@@ -297,8 +393,23 @@ const VoiceControl = ({
         <div className="error-content">
           <span className="error-icon">⚠️</span>
           <h3>Voice Control Not Available</h3>
-          <p>Voice recognition is not supported in this browser.</p>
-          <p>Please use <strong>Chrome</strong>, <strong>Edge</strong>, or <strong>Safari</strong> for voice control features.</p>
+          <p>Use Chrome, Edge, or Safari</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentAppMode === 'speech') {
+    return (
+      <div className={`voice-control-container ${className}`} style={{ opacity: 0.6 }}>
+        <div className="voice-control-header">
+          <h3 className="voice-control-title">
+            <span className="title-icon">🎤</span>
+            Voice Control (Paused)
+          </h3>
+        </div>
+        <div className="voice-status" style={{ backgroundColor: '#fff3cd', borderLeftColor: '#ffc107' }}>
+          <strong>⚠️ Paused in Speech Mode</strong>
         </div>
       </div>
     );
@@ -307,134 +418,89 @@ const VoiceControl = ({
   return (
     <>
       <div className={`voice-control-container ${className}`}>
-        {/* Header with toggle button */}
         <div className="voice-control-header">
           <h3 className="voice-control-title">
             <span className="title-icon">🎤</span>
             Voice Control
+            {isSpeaking && <span style={{ marginLeft: '10px', fontSize: '0.8em', color: '#28a745' }}>🔊 Speaking...</span>}
+            {isVisuallyImpaired && <span style={{ marginLeft: '10px', fontSize: '0.7em', color: '#28a745' }}>♿</span>}
           </h3>
           <button 
             onClick={toggleListening}
             className={`voice-toggle-btn ${isListening ? 'active' : ''}`}
-            aria-label={isListening ? 'Stop voice control' : 'Start voice control'}
-            aria-pressed={isListening}
           >
-            {isListening ? (
-              <>
-                <span>⏸️</span> Stop Listening
-              </>
-            ) : (
-              <>
-                <span>▶️</span> Start Listening
-              </>
-            )}
+            {isListening ? '⏸️ Stop' : '▶️ Start'}
           </button>
         </div>
 
-        {/* Status Display */}
         <div className={`voice-status ${isListening ? 'listening' : ''}`}>
           <strong>Status:</strong> {status}
         </div>
 
-        {/* Live Transcript */}
-        {transcript && isListening && (
+        {transcript && isListening && !isSpeaking && (
           <div className="voice-transcript">
-            <strong>You're saying:</strong> "{transcript}"
+            <strong>You said:</strong> "{transcript}"
           </div>
         )}
 
-        {/* Last Command */}
         {lastCommand && (
           <div className="voice-last-command">
-            <strong>Last command:</strong> {lastCommand}
+            <strong>Last:</strong> {lastCommand}
           </div>
         )}
 
-        {/* Command Reference */}
         <details className="voice-help-section">
           <summary className="voice-help-summary">
             <span className="help-icon">💡</span>
-            Voice Commands Reference
+            Commands
           </summary>
           <div className="command-list">
             <div className="command-group">
-              <h4 className="command-group-title">📷 Camera Control</h4>
+              <p style={{ marginBottom: '10px' }}>Speak naturally:</p>
               <ul>
-                <li><code>"start camera"</code> - Activate the camera</li>
-                <li><code>"analyze"</code> - Analyze current image</li>
-              </ul>
-            </div>
-            <div className="command-group">
-              <h4 className="command-group-title">🔍 Analysis Modes</h4>
-              <ul>
-                <li><code>"general view"</code> - Switch to general analysis</li>
-                <li><code>"read text"</code> - Switch to text reading (OCR)</li>
-                <li><code>"detect hazards"</code> - Switch to hazard detection</li>
-              </ul>
-            </div>
-            <div className="command-group">
-              <h4 className="command-group-title">⚙️ Utility</h4>
-              <ul>
-                <li><code>"help"</code> - Hear available commands</li>
-                <li><code>"stop listening"</code> - Stop voice control</li>
+                <li>"Show camera" - start camera</li>
+                <li>"What do you see" - analyze</li>
+                <li>"Check dangers" - hazard mode</li>
+                <li>"Read text" - text mode</li>
+                <li>"Stop camera" - stop camera</li>
               </ul>
             </div>
           </div>
         </details>
 
-        {/* Accessibility Notice */}
-        <div className="accessibility-notice" role="complementary">
+        <div className="accessibility-notice">
           <span className="notice-icon">♿</span>
-          <small>Voice control is fully accessible with screen readers and keyboard navigation</small>
+          <small>Speak naturally - no exact commands needed</small>
         </div>
       </div>
 
-      {/* Floating Voice Button (for mobile/minimal UI) */}
       {isListening && (
-        <div className="listening-indicator" role="status" aria-live="polite">
+        <div className="listening-indicator">
           <span className="pulse-dot"></span>
           Listening
           {transcript && <span className="transcript"> - "{transcript}"</span>}
         </div>
       )}
 
-      {/* Microphone Permission Modal */}
       {showPermissionModal && (
-        <div className="mic-permission-modal" role="dialog" aria-labelledby="permission-title">
+        <div className="mic-permission-modal">
           <div className="mic-permission-content">
             <div className="mic-permission-icon">🎤</div>
-            <h2 id="permission-title" className="mic-permission-title">Microphone Access Required</h2>
+            <h2 className="mic-permission-title">Microphone Access Required</h2>
             <p className="mic-permission-text">
-              Hand2Voice needs access to your microphone to enable voice control.
-              This allows you to control the camera and analysis features hands-free.
+              Hand2Voice needs microphone access for voice control.
             </p>
             <div className="mic-permission-buttons">
-              <button 
-                onClick={requestMicrophonePermission}
-                className="btn-primary"
-              >
+              <button onClick={requestMicrophonePermission} className="btn-primary">
                 Enable Microphone
               </button>
-              <button 
-                onClick={() => setShowPermissionModal(false)}
-                className="btn-secondary"
-              >
+              <button onClick={() => setShowPermissionModal(false)} className="btn-secondary">
                 Cancel
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Screen Reader Announcements */}
-      <div 
-        role="status" 
-        aria-live="polite" 
-        aria-atomic="true"
-        className="sr-only"
-      >
-        {status}
-      </div>
     </>
   );
 };
