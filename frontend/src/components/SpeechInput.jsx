@@ -1,129 +1,165 @@
 import React from 'react';
+import { Mic } from 'lucide-react';
 
 export default function SpeechInput({ isListening, toggleListening, isTranscribing }) {
   return (
-    <div className="speech-input" style={{ 
-      padding: '2rem', 
+    <div style={{ 
+      padding: '3rem 2rem', 
       textAlign: 'center',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '400px'
+      minHeight: '450px',
+      backgroundColor: '#F5F5F5',
+      borderRadius: '16px',
+      border: isListening ? '4px solid #EE7733' : '4px solid transparent',
+      boxShadow: isListening ? '0 8px 24px rgba(238, 119, 51, 0.3)' : '0 4px 12px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease'
     }}>
       
-      {/* Microphone Icon */}
-      <div className="microphone-icon" style={{ 
+      {/* Microphone Icon with pulse animation */}
+      <div style={{ 
         marginBottom: '2rem',
-        transition: 'all 0.3s ease'
+        transition: 'all 0.3s ease',
+        animation: isListening ? 'pulse 1.5s infinite' : 'none'
       }}>
-        <svg 
-          width="120" 
-          height="120" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke={isListening ? "#3b82f6" : "#d1d5db"}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8" y1="23" x2="16" y2="23"/>
-        </svg>
+        <div style={{
+          width: '140px',
+          height: '140px',
+          borderRadius: '50%',
+          backgroundColor: isListening ? '#FFF0E6' : '#E6F3FF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: `6px solid ${isListening ? '#EE7733' : '#0077BB'}`,
+          boxShadow: isListening 
+            ? '0 8px 24px rgba(238, 119, 51, 0.4)' 
+            : '0 4px 12px rgba(0, 119, 187, 0.2)'
+        }}>
+          <Mic 
+            size={60} 
+            color={isListening ? '#EE7733' : '#0077BB'}
+            strokeWidth={2.5}
+          />
+        </div>
       </div>
       
       {/* Status Text */}
-      <p className="status-text" style={{ 
-        fontSize: '1.5rem', 
-        marginBottom: '2rem',
-        fontWeight: '500',
-        color: isTranscribing ? '#f59e0b' : isListening ? '#3b82f6' : '#9ca3af',
-        transition: 'color 0.3s ease'
+      <p style={{ 
+        fontSize: '1.8rem', 
+        marginBottom: '2.5rem',
+        fontWeight: '700',
+        color: isTranscribing ? '#EE7733' : isListening ? '#CC3311' : '#0077BB',
+        transition: 'color 0.3s ease',
+        textTransform: 'uppercase',
+        letterSpacing: '1px'
       }}>
         {isTranscribing ? 'Transcribing...' : 
          isListening ? 'Recording...' : 
-         'Ready'}
+         'Ready to Listen'}
       </p>
       
       {/* Start/Stop Button */}
       <button 
         onClick={toggleListening}
-        className={`listen-button ${isListening ? 'active' : ''}`}
         disabled={isTranscribing}
         style={{
-          padding: '1rem 3rem',
-          fontSize: '1.1rem',
-          fontWeight: '600',
-          borderRadius: '12px',
+          padding: '1.25rem 3.5rem',
+          fontSize: '1.2rem',
+          fontWeight: '700',
+          borderRadius: '14px',
           border: 'none',
-          backgroundColor: isTranscribing ? '#9ca3af' : 
-                          isListening ? '#ef4444' : 
-                          '#3b82f6',
+          backgroundColor: isTranscribing ? '#888888' : 
+                          isListening ? '#CC3311' : 
+                          '#009988',
           color: 'white',
           cursor: isTranscribing ? 'not-allowed' : 'pointer',
           transition: 'all 0.3s ease',
-          boxShadow: isListening ? '0 4px 12px rgba(239, 68, 68, 0.4)' : 
-                                  '0 4px 12px rgba(59, 130, 246, 0.4)',
-          transform: isListening ? 'scale(1.05)' : 'scale(1)',
+          boxShadow: isListening 
+            ? '0 6px 20px rgba(204, 51, 17, 0.4)' 
+            : '0 6px 20px rgba(0, 153, 136, 0.4)',
+          transform: isListening ? 'scale(1.08)' : 'scale(1)',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
         }}
         onMouseEnter={(e) => {
           if (!isTranscribing) {
-            e.target.style.transform = 'scale(1.05)';
+            e.target.style.transform = 'scale(1.08)';
+            e.target.style.boxShadow = isListening 
+              ? '0 8px 24px rgba(204, 51, 17, 0.5)' 
+              : '0 8px 24px rgba(0, 153, 136, 0.5)';
           }
         }}
         onMouseLeave={(e) => {
           if (!isTranscribing) {
-            e.target.style.transform = isListening ? 'scale(1.05)' : 'scale(1)';
+            e.target.style.transform = isListening ? 'scale(1.08)' : 'scale(1)';
+            e.target.style.boxShadow = isListening 
+              ? '0 6px 20px rgba(204, 51, 17, 0.4)' 
+              : '0 6px 20px rgba(0, 153, 136, 0.4)';
           }
         }}
       >
-        {isTranscribing ? 'Processing...' :
-         isListening ? 'Stop Recording' : 
-         'Start Listening'}
+        {isTranscribing ? '⏳ Processing...' :
+         isListening ? '⏹ Stop Recording' : 
+         '🎤 Start Listening'}
       </button>
 
       {/* Helper Text */}
       {!isListening && !isTranscribing && (
         <p style={{ 
-          marginTop: '1.5rem',
-          fontSize: '0.9rem',
-          color: '#6b7280',
-          maxWidth: '300px'
+          marginTop: '2rem',
+          fontSize: '1rem',
+          color: '#666666',
+          maxWidth: '400px',
+          lineHeight: '1.6',
+          fontWeight: '500'
         }}>
           Click the button above to start recording your voice.
-          Click stop when done.
+          Click stop when you're done speaking.
         </p>
       )}
 
       {/* Processing Indicator */}
       {isTranscribing && (
         <div style={{
-          marginTop: '1.5rem',
+          marginTop: '2rem',
           display: 'flex',
-          gap: '0.5rem',
-          alignItems: 'center'
+          gap: '0.75rem',
+          alignItems: 'center',
+          padding: '1rem 1.5rem',
+          backgroundColor: '#FFF0E6',
+          borderRadius: '10px',
+          border: '2px solid #EE7733'
         }}>
           <div className="spinner" style={{
-            width: '20px',
-            height: '20px',
-            border: '3px solid #f3f4f6',
-            borderTop: '3px solid #3b82f6',
+            width: '24px',
+            height: '24px',
+            border: '4px solid #FFF0E6',
+            borderTop: '4px solid #EE7733',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite'
           }}></div>
-          <span style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+          <span style={{ 
+            color: '#EE7733', 
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}>
             Converting speech to text...
           </span>
         </div>
       )}
 
-      {/* Add CSS animation for spinner */}
+      {/* Animations */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
         }
       `}</style>
     </div>

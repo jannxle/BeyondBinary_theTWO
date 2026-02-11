@@ -1,0 +1,31 @@
+{
+  "test@gmail.com": {
+    "name": "test",
+    "email": "test@gmail.com",
+    "password": "Hand2Voice",
+    "disabilities": []
+  },
+  "your@gmail.com": {
+    "name": "John Doe",
+    "email": "your@gmail.com",
+    "password": "a2ca68f68b9111467c20f3add25388962071030ea3f8bbc89043ca13e75fc12e",
+    "disabilities": [],
+    "created_at": "2026-02-11T16:04:13.866509"
+  },
+  "Test@gmail.com": {
+    "name": "Test",
+    "email": "Test@gmail.com",
+    "password": "a2ca68f68b9111467c20f3add25388962071030ea3f8bbc89043ca13e75fc12e",
+    "disabilities": [],
+    "created_at": "2026-02-11T16:13:52.955180"
+  },
+  "hello@gmail.com": {
+    "name": "hello",
+    "email": "hello@gmail.com",
+    "password": "a2ca68f68b9111467c20f3add25388962071030ea3f8bbc89043ca13e75fc12e",
+    "disabilities": [
+      "Hearing Impairment"
+    ],
+    "created_at": "2026-02-11T16:39:17.113546"
+  }
+}

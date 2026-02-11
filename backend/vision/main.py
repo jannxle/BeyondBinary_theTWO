@@ -115,6 +115,8 @@ class VisualBuddy:
         finally:
             self.is_processing = False
 
+
+
 if __name__ == "__main__":
     app = VisualBuddy()
     app.run()
