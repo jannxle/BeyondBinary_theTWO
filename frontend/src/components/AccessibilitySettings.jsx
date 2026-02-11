@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Settings, Type, Contrast, Volume2, RotateCcw } from 'lucide-react';
 
 export default function AccessibilitySettings({ 
@@ -20,6 +20,27 @@ export default function AccessibilitySettings({
     { value: 'high-yellow', label: 'High Contrast (Yellow)', bg: '#000000', text: '#FFFF00' },
     { value: 'inverted', label: 'Inverted', bg: '#1a1a1a', text: '#FFFFFF' }
   ];
+
+  // Apply text size to the document root
+  useEffect(() => {
+    const currentSize = textSizes.find(s => s.value === settings.textSize);
+    if (currentSize) {
+      document.documentElement.style.fontSize = `${currentSize.scale * 16}px`;
+    }
+  }, [settings.textSize]);
+
+  // Apply contrast mode to the document
+  useEffect(() => {
+    const currentMode = contrastModes.find(m => m.value === settings.contrastMode);
+    if (currentMode) {
+      document.documentElement.style.setProperty('--bg-color', currentMode.bg);
+      document.documentElement.style.setProperty('--text-color', currentMode.text);
+      
+      // Also apply to body for immediate effect
+      document.body.style.backgroundColor = currentMode.bg;
+      document.body.style.color = currentMode.text;
+    }
+  }, [settings.contrastMode]);
 
   const resetSettings = () => {
     onSettingsChange({
